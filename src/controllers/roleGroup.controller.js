@@ -11,6 +11,7 @@ const httpStatus = require('http-status');
 // const Role = require('../role/role.model');
 const lodash = require('lodash');
 // const Client = require('../oauth/client.model');
+const Client = require('../models/clientModel');
 const axios = require('axios');
 const qs = require('qs');
 const https = require('https');
@@ -537,28 +538,27 @@ function get(req, res) {
   res.json(req.roleGroup);
 }
 async function iamUserBussinessRole(req, res, next) {
+
   try {
     const { userId } = req.params;
-    console.log(userId);
-
-    console.log(userId);
-
     if (!userId) {
       return res.status(400).json({ msg: 'userId required' });
     }
 
     if (!process.env.IAM_ENABLE) {
       const role = await RoleGroup.findOne({ userId });
-
       if (!role) {
         return res.status(404).json({ msg: 'Role not found' });
       }
       return res.json(role);
     }
+    const iam = await Client.find({ clientId, clientSecret })
+    console.log(iam);
 
-    if (!process.env.IAM_CLIENT_ID || !process.env.IAM_CLIENT_SECRET) {
+    if (!iam) {
       return res.status(400).json({ msg: 'Missing IAM config for clientId in ENV file' });
     }
+
     const token = await getToken(ROLE_VIEW_SCOPE);
     // console.log(token);
     if (!token) {
